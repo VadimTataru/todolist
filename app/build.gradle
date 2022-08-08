@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -29,9 +30,23 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
+
+    //Room
+    implementation 'androidx.room:room-runtime:2.4.3'
+    implementation 'androidx.room:room-rxjava2:2.4.3'
+    kapt 'androidx.room:room-compiler:2.4.3'
+    implementation 'androidx.room:room-ktx:2.4.3'
+
+    //Dagger Hilt
+    implementation 'com.google.dagger:hilt-android:2.43.2'
+    kapt 'com.google.dagger:hilt-compiler:2.43.2'
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
