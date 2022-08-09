@@ -9,5 +9,16 @@
         android:id="@+id/wrapperFragment"
         android:name="com.fox.todolist.presentation.fragments.WrapperFragment"
         android:label="fragment_wrapper"
-        tools:layout="@layout/fragment_wrapper" />
+        tools:layout="@layout/fragment_wrapper" >
+        <action
+            android:id="@+id/action_wrapperFragment_to_mainFragment"
+            app:destination="@id/mainFragment"
+            app:popUpToInclusive="true"
+            app:popUpTo="@id/wrapperFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.fox.todolist.presentation.fragments.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" />
 </navigation>
