@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_salmon"
     tools:context=".presentation.fragments.MainFragment">
 
     <TextView
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textSize="20sp"
-        android:textColor="@color/black"
+        android:textColor="@color/milk"
         android:layout_marginTop="8dp"
         android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,14 +33,15 @@
         tools:ignore="SpeakableTextPresentCheck"
         tools:listitem="@layout/task_item" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="Add"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/ic_baseline_add_circle_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:ignore="SpeakableTextPresentCheck" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
