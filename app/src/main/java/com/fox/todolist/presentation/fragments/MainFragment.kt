@@ -32,7 +32,7 @@ class MainFragment : Fragment() {
 
     private fun initViews() {
         binding.btnAdd.setOnClickListener {
-            mockData()
+
         }
     }
 
@@ -41,10 +41,5 @@ class MainFragment : Fragment() {
             noteAdapter = NoteAdapter()
             adapter = noteAdapter
         }
-    }
-
-    private fun mockData() {
-        val num = Random.nextInt(10)
-        noteAdapter.mockData("Note #$num")
     }
 }

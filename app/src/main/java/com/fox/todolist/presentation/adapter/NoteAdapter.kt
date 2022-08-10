@@ -6,18 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.fox.todolist.R
+import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.TaskItemBinding
 
 class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteHolder>() {
 
-    // TODO: Change to NoteClass
-    private val noteList = mutableListOf<String>()
+    private var noteList = mutableListOf<NoteEntity>()
 
     class NoteHolder(item: View): RecyclerView.ViewHolder(item) {
         private val binding = TaskItemBinding.bind(item)
 
-        fun bind(header: String) {
-            binding.tvTitle.text = header
+        fun bind(note: NoteEntity) {
+            binding.tvTitle.text = note.title
         }
     }
 
@@ -35,8 +35,20 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteHolder>() {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun mockData(data: String) {
-        noteList.add(data)
+    fun fillNoteList(notes: MutableList<NoteEntity>) {
+        noteList = notes
+        notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun addNote(note: NoteEntity) {
+        noteList.add(note)
+        notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun removeNote(note: NoteEntity) {
+        noteList.remove(note)
         notifyDataSetChanged()
     }
 }
