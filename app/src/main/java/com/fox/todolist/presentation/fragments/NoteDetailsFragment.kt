@@ -9,12 +9,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import androidx.fragment.app.viewModels
 import com.fox.todolist.R
 import com.fox.todolist.databinding.FragmentNoteDetailsBinding
+import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
+@AndroidEntryPoint
 class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
     lateinit var binding: FragmentNoteDetailsBinding
+    private val viewModel by viewModels<NoteDetailsViewModel>()
 
     private var year = 0
     private var month = 0
