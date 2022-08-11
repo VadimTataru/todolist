@@ -7,4 +7,19 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!--First palette-->
+    <color name="salmon_orange">#E75D41</color>
+    <color name="milk">#FFFFE3</color>
+    <color name="light_milk">#B2FFFFE3</color>
+    <color name="pale_red_purple">#AB7783</color>
+    <color name="intense_orange">#FFBD5F</color>
+    <color name="dark_salmon">#E79472</color>
+
+    <!--Second palette-->
+    <color name="pink">#EE9991</color>
+    <color name="blue_gray">#76A3C4</color>
+    <color name="khaki">#819672</color>
+    <color name="light_purple">#AA9DB1</color>
+    <color name="red_orange">#EB351D</color>
 </resources>
