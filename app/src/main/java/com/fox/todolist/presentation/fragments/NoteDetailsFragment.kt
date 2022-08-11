@@ -39,6 +39,8 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //remove this)
+        viewModel.showLog()
         binding.btnCalendar.setOnClickListener {
             date = ""
             pickDate()

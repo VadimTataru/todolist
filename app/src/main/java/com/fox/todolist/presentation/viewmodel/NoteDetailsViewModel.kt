@@ -7,8 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class NoteDetailsViewModel @Inject constructor() : BaseViewModel() {
+class NoteDetailsViewModel @Inject constructor(private val str: String) : BaseViewModel() {
+
     init {
-        Log.d(CHECK_TAG, "hi there")
+        Log.d(CHECK_TAG, "hi there! I provide you")
+    }
+
+    fun showLog() {
+        Log.d(CHECK_TAG, "hi there! I provide you $str")
     }
 }
