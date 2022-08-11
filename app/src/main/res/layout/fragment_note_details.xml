@@ -62,11 +62,11 @@
         tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
+        android:id="@+id/tv_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:minHeight="48dp"
-        android:text="11/08/2022 10:25"
         android:textColor="@color/milk"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_calendar"
