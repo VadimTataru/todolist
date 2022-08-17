@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.fox.todolist.R
+import com.fox.todolist.data.model.ListTuple
 import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.TaskItemBinding
 
@@ -35,8 +36,10 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteHolder>() {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun fillNoteList(notes: MutableList<NoteEntity>) {
-        noteList = notes
+    fun fillNoteList(notes: List<NoteEntity>?) {
+        if(notes != null)
+            noteList = notes.toMutableList()
+        else return
         notifyDataSetChanged()
     }
 

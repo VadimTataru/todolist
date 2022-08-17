@@ -10,9 +10,12 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.fox.todolist.R
+import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.FragmentNoteDetailsBinding
 import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
@@ -39,11 +42,15 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //remove this)
-        viewModel.showLog()
         binding.btnCalendar.setOnClickListener {
             date = ""
             pickDate()
+        }
+
+        binding.btnAdd.setOnClickListener {
+            viewModel.saveNote(buildNoteEntity())
+            Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
         }
     }
 
@@ -71,5 +78,15 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         date += " $hour:$min"
         binding.tvDate.text = ""
         binding.tvDate.text = date
+    }
+
+    private fun buildNoteEntity(): NoteEntity {
+        return NoteEntity(
+            0,
+            binding.etTitle.text.toString(),
+            binding.etDescription.text.toString(),
+            20000,
+            0
+        )
     }
 }

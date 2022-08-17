@@ -8,7 +8,7 @@ import com.fox.todolist.utils.Converters
 
 @Database(
     entities = [NoteEntity::class],
-    version = 0
+    version = 1
 )
 @TypeConverters(Converters::class)
 abstract class NoteDatabase: RoomDatabase() {
