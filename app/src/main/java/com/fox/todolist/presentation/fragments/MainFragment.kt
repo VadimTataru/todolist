@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.fox.todolist.R
 import com.fox.todolist.data.model.NoteEntity
@@ -35,25 +36,26 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRecycler()
-        initViews()
+        initRecycler(view)
+        initViews(view)
 
         viewModel.getNotes().observe(viewLifecycleOwner, Observer{ notes ->
             noteAdapter.fillNoteList(notes)
         })
     }
 
-    private fun initViews() {
+    private fun initViews(view: View) {
         binding.btnAdd.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_noteDetailsFragment)
         }
     }
 
-    private fun initRecycler() {
+    private fun initRecycler(view: View) {
         binding.recyclerView.apply {
             noteAdapter = NoteAdapter(object: NoteActionListener {
                 override fun onNoteDetails(note: NoteEntity) {
-                    Toast.makeText(requireContext(), note.id.toString(), Toast.LENGTH_SHORT).show()
+                    val action = MainFragmentDirections.actionMainFragmentToNoteDetailsFragment(note.id)
+                    Navigation.findNavController(view).navigate(action)
                 }
 
                 override fun onNoteFavouriteState(note: NoteEntity) {

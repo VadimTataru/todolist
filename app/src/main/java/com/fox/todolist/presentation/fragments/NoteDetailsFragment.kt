@@ -11,6 +11,7 @@ import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.fox.todolist.R
 import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.FragmentNoteDetailsBinding
@@ -52,6 +53,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
         }
+
+        val noteId = getArgs()
+        binding.tvDate.text = noteId.toString()
     }
 
     private fun pickDate() {
@@ -88,5 +92,13 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             20000,
             0
         )
+    }
+
+    private fun getArgs(): Int {
+        val args: NoteDetailsFragmentArgs by navArgs()
+        return if(args.noteIdArg != null || args.noteIdArg != 0)
+            args.noteIdArg
+        else
+            0
     }
 }
