@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.fox.todolist.R
@@ -18,6 +21,7 @@ import com.fox.todolist.databinding.FragmentNoteDetailsBinding
 import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.*
 
 @AndroidEntryPoint
@@ -43,19 +47,33 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val noteId = getArgs()
+
         binding.btnCalendar.setOnClickListener {
             date = ""
             pickDate()
         }
 
         binding.btnAdd.setOnClickListener {
-            viewModel.saveNote(buildNoteEntity())
-            Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
+            if(noteId == 0) {
+                viewModel.saveNote(buildNoteEntity())
+                Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
+            } else {
+                viewModel.updateNote(buildNoteEntity(noteId))
+                Snackbar.make(view, "Updated", Snackbar.LENGTH_SHORT).show()
+            }
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
         }
 
-        val noteId = getArgs()
-        binding.tvDate.text = noteId.toString()
+        if(noteId != 0) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.getById(noteId).collect{
+                        fillFields(it!!)
+                    }
+                }
+            }
+        }
     }
 
     private fun pickDate() {
@@ -84,9 +102,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         binding.tvDate.text = date
     }
 
-    private fun buildNoteEntity(): NoteEntity {
+    private fun buildNoteEntity(id: Int = 0): NoteEntity {
         return NoteEntity(
-            0,
+            id,
             binding.etTitle.text.toString(),
             binding.etDescription.text.toString(),
             20000,
@@ -100,5 +118,11 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             args.noteIdArg
         else
             0
+    }
+
+    private fun fillFields(note: NoteEntity) {
+        binding.etTitle.setText(note.title)
+        binding.etDescription.setText(note.description)
+        binding.tvDate.text = note.date.toString()
     }
 }
