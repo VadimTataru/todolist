@@ -1,5 +1,6 @@
 package com.fox.todolist.presentation.fragments
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -22,6 +23,7 @@ import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
@@ -49,6 +51,15 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         super.onViewCreated(view, savedInstanceState)
         val noteId = getArgs()
 
+        if(noteId != 0) {
+            binding.btnDelete.visibility = View.VISIBLE
+            binding.btnDelete.setOnClickListener {
+                viewModel.deleteNote(buildNoteEntity(noteId))
+                Snackbar.make(view, "Deleted", Snackbar.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
+            }
+        }
+
         binding.btnCalendar.setOnClickListener {
             date = ""
             pickDate()
@@ -66,11 +77,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         }
 
         if(noteId != 0) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.getById(noteId).collect{
-                        fillFields(it!!)
-                    }
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.getById(noteId).collect{
+                    fillFields(it!!)
                 }
             }
         }
@@ -91,7 +100,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     }
 
     override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
-        date += "$day/${month+1}/$year"
+        date += "$day-${month+1}-$year"
         getDateTimeCalendar()
         TimePickerDialog(requireContext(), this, hour, minute, true).show()
     }
@@ -102,19 +111,25 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         binding.tvDate.text = date
     }
 
+    @SuppressLint("SimpleDateFormat")
+    // FIXME: Date format troubles 
     private fun buildNoteEntity(id: Int = 0): NoteEntity {
+        val dateAsString = binding.tvDate.text.toString()
         return NoteEntity(
             id,
             binding.etTitle.text.toString(),
             binding.etDescription.text.toString(),
-            20000,
+            if(dateAsString.isBlank())
+                null
+            else
+                SimpleDateFormat("dd-MM-yyyy HH:mm").parse(binding.tvDate.text.toString()),
             0
         )
     }
 
     private fun getArgs(): Int {
         val args: NoteDetailsFragmentArgs by navArgs()
-        return if(args.noteIdArg != null || args.noteIdArg != 0)
+        return if(args.noteIdArg != 0)
             args.noteIdArg
         else
             0
