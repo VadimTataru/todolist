@@ -24,20 +24,23 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @AndroidEntryPoint
 class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
     lateinit var binding: FragmentNoteDetailsBinding
     private val viewModel by viewModels<NoteDetailsViewModel>()
+    private lateinit var noteEntity: NoteEntity
 
+    //Date pick vars
     private var year = 0
     private var month = 0
     private var day = 0
     private var hour = 0
     private var minute = 0
     private var date = ""
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,9 +55,18 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         val noteId = getArgs()
 
         if(noteId != 0) {
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.getById(noteId).collect{
+                    noteEntity = it ?: NoteEntity(0, "", "", Date(0), 0)
+                    fillFields(noteEntity)
+                }
+            }
+        }
+
+        if(noteId != 0) {
             binding.btnDelete.visibility = View.VISIBLE
             binding.btnDelete.setOnClickListener {
-                viewModel.deleteNote(buildNoteEntity(noteId))
+                viewModel.deleteNote(noteEntity)
                 Snackbar.make(view, "Deleted", Snackbar.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
             }
@@ -74,14 +86,6 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
                 Snackbar.make(view, "Updated", Snackbar.LENGTH_SHORT).show()
             }
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
-        }
-
-        if(noteId != 0) {
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.getById(noteId).collect{
-                    fillFields(it!!)
-                }
-            }
         }
     }
 
@@ -112,7 +116,6 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     }
 
     @SuppressLint("SimpleDateFormat")
-    // FIXME: Date format troubles 
     private fun buildNoteEntity(id: Int = 0): NoteEntity {
         val dateAsString = binding.tvDate.text.toString()
         return NoteEntity(
@@ -135,9 +138,10 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             0
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun fillFields(note: NoteEntity) {
         binding.etTitle.setText(note.title)
         binding.etDescription.setText(note.description)
-        binding.tvDate.text = note.date.toString()
+        binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date!!)
     }
 }

@@ -37,14 +37,14 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecycler(view)
-        initViews(view)
+        initViews()
 
         viewModel.getNotes().observe(viewLifecycleOwner, Observer{ notes ->
             noteAdapter.fillNoteList(notes)
         })
     }
 
-    private fun initViews(view: View) {
+    private fun initViews() {
         binding.btnAdd.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_noteDetailsFragment)
         }
