@@ -6,15 +6,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.fox.todolist.R
+import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.FragmentMainBinding
 import com.fox.todolist.presentation.adapter.NoteAdapter
-import kotlin.random.Random
+import com.fox.todolist.presentation.listeners.NoteActionListener
+import com.fox.todolist.presentation.viewmodel.MainFragmentViewModel
+import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainFragment : Fragment() {
 
     private lateinit var binding: FragmentMainBinding
     private lateinit var noteAdapter: NoteAdapter
+    private val viewModel by viewModels<MainFragmentViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,19 +36,37 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRecycler()
+        initRecycler(view)
         initViews()
+
+        viewModel.getNotes().observe(viewLifecycleOwner, Observer{ notes ->
+            noteAdapter.fillNoteList(notes)
+        })
     }
 
     private fun initViews() {
         binding.btnAdd.setOnClickListener {
-
+            findNavController().navigate(R.id.action_mainFragment_to_noteDetailsFragment)
         }
     }
 
-    private fun initRecycler() {
+    private fun initRecycler(view: View) {
         binding.recyclerView.apply {
-            noteAdapter = NoteAdapter()
+            noteAdapter = NoteAdapter(object: NoteActionListener {
+                override fun onNoteDetails(note: NoteEntity) {
+                    val action = MainFragmentDirections.actionMainFragmentToNoteDetailsFragment(note.id)
+                    Navigation.findNavController(view).navigate(action)
+                }
+
+                override fun onNoteFavouriteState(note: NoteEntity) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onNoteDelete(note: NoteEntity) {
+                    TODO("Not yet implemented")
+                }
+
+            })
             adapter = noteAdapter
         }
     }
