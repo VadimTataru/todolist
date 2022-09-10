@@ -4,8 +4,10 @@ object Constants {
     const val CHECK_TAG = "just_checking"
 
     //notification class
-    const val NOTIFICATION_ID = 1
-    const val CHANNEL_ID = "channel1"
-    const val TITLE_EXTRA = "titleExtra"
-    const val MESSAGE_EXTRA = "messageExtra"
+    const val CHANNEL_ID = "ToDoListReminder"
+    const val GROUP_MESSAGE = "ToDoList"
+    const val NOTIFICATION_CHANNEL_NAME = "Notifications"
+    const val NOTIFICATION_CHANNEL_DESCRIPTION = "Channel for notifications"
+    const val NOTE_TITLE_EXTRA = "NoteTitle"
+    const val NOTE_DESC_EXTRA = "NoteDescription"
 }

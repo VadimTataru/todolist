@@ -1,8 +1,14 @@
 package com.fox.todolist.presentation.fragments
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.ClipDescription
+import android.content.Context.ALARM_SERVICE
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,6 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import androidx.annotation.RequiresApi
+import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +28,9 @@ import com.fox.todolist.R
 import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.FragmentNoteDetailsBinding
 import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
+import com.fox.todolist.receiver.NotificationReceiver
+import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
+import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -143,5 +154,19 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         binding.etTitle.setText(note.title)
         binding.etDescription.setText(note.description)
         binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date!!)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("UnspecifiedImmutableFlag")
+    private fun setAlarm(calendar: Calendar, title: String, description: String) {
+        val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(requireContext(), NotificationReceiver::class.java)
+        intent.putExtra(NOTE_TITLE_EXTRA, title)
+        intent.putExtra(NOTE_DESC_EXTRA, description)
+
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis , pendingIntent)
+
     }
 }
