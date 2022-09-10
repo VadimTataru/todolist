@@ -17,6 +17,7 @@ class NotificationReceiver: BroadcastReceiver() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onReceive(context: Context, intent: Intent) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val notification = Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -24,7 +25,7 @@ class NotificationReceiver: BroadcastReceiver() {
             .setContentText(intent.getStringExtra(MESSAGE_EXTRA))
             .build()
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         manager.notify(NOTIFICATION_ID, notification)
     }
 }

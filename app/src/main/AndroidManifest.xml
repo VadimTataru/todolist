@@ -28,7 +28,9 @@
 
         <receiver
             android:name=".receiver.NotificationReceiver"
-            android:enabled="true"/>
+            android:enabled="true">
+
+        </receiver>
     </application>
 
 </manifest>

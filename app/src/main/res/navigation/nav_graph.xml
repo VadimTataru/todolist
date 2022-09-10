@@ -32,7 +32,9 @@
         tools:layout="@layout/fragment_note_details" >
         <action
             android:id="@+id/action_noteDetailsFragment_to_mainFragment"
-            app:destination="@id/mainFragment" />
+            app:destination="@id/mainFragment"
+            app:popUpToInclusive="true"
+            app:popUpTo="@id/noteDetailsFragment"/>
         <argument
             android:name="noteIdArg"
             android:defaultValue="0" />
