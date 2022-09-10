@@ -22,4 +22,10 @@
     <color name="khaki">#819672</color>
     <color name="light_purple">#AA9DB1</color>
     <color name="red_orange">#EB351D</color>
+
+    <!-- Third palette-->
+    <color name="black_graphite">#1C1C1C</color>
+    <color name="red_ter">#CC4E5C</color>
+    <color name="green_pastel">#50C878</color>
+    <color name="yellow_light">#B5A642</color>
 </resources>
