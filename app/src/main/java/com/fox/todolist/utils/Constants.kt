@@ -10,4 +10,5 @@ object Constants {
     const val NOTIFICATION_CHANNEL_DESCRIPTION = "Channel for notifications"
     const val NOTE_TITLE_EXTRA = "NoteTitle"
     const val NOTE_DESC_EXTRA = "NoteDescription"
+    const val NOTE_CHANNEL_ID_INC = "Increase id"
 }

@@ -10,6 +10,7 @@ import com.fox.todolist.data.model.ListTuple
 import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.TaskItemBinding
 import com.fox.todolist.presentation.listeners.NoteActionListener
+import java.text.SimpleDateFormat
 
 class NoteAdapter(
     private val actionListener: NoteActionListener
@@ -21,8 +22,10 @@ class NoteAdapter(
     class NoteHolder(item: View): RecyclerView.ViewHolder(item) {
         private val binding = TaskItemBinding.bind(item)
 
+        @SuppressLint("SimpleDateFormat")
         fun bind(note: NoteEntity) {
             binding.tvTitle.text = note.title
+            binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date!!)
         }
     }
 

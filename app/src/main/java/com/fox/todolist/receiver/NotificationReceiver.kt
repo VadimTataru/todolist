@@ -8,10 +8,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.fox.todolist.R
 import com.fox.todolist.utils.Constants.CHANNEL_ID
 import com.fox.todolist.utils.Constants.GROUP_MESSAGE
+import com.fox.todolist.utils.Constants.NOTE_CHANNEL_ID_INC
 import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
 import com.fox.todolist.utils.Constants.NOTIFICATION_CHANNEL_DESCRIPTION
@@ -26,6 +28,7 @@ class NotificationReceiver: BroadcastReceiver() {
 
         val title = intent.getStringExtra(NOTE_TITLE_EXTRA)
         val description = intent.getStringExtra(NOTE_DESC_EXTRA)
+        val increase = intent.getIntExtra(NOTE_CHANNEL_ID_INC, Random(100).nextInt())
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
@@ -50,8 +53,12 @@ class NotificationReceiver: BroadcastReceiver() {
             .build()
 
 
-        notificationManager.notify(getNotificationId(), notification)
+        notificationManager.notify(getNotificationId(increase), notification)
     }
 
-    private fun getNotificationId(): Int = (Date().time / 1000L % Integer.MAX_VALUE).toInt()
+    private fun getNotificationId(increase: Int): Int {
+        val id = (Date().time / 1000L % Integer.MAX_VALUE).toInt() + increase
+        Log.d("Tag", id.toString())
+        return id
+    }
 }

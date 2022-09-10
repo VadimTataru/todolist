@@ -10,6 +10,7 @@ import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,7 @@ import com.fox.todolist.data.model.NoteEntity
 import com.fox.todolist.databinding.FragmentNoteDetailsBinding
 import com.fox.todolist.presentation.viewmodel.NoteDetailsViewModel
 import com.fox.todolist.receiver.NotificationReceiver
+import com.fox.todolist.utils.Constants.NOTE_CHANNEL_ID_INC
 import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
 import com.google.android.material.snackbar.Snackbar
@@ -44,6 +46,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     lateinit var binding: FragmentNoteDetailsBinding
     private val viewModel by viewModels<NoteDetailsViewModel>()
     private lateinit var noteEntity: NoteEntity
+    private lateinit var cal: Calendar
 
     //Date pick vars
     private var year = 0
@@ -61,6 +64,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val noteId = getArgs()
@@ -90,8 +94,10 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
         binding.btnAdd.setOnClickListener {
             if(noteId == 0) {
-                viewModel.saveNote(buildNoteEntity())
+                val note = buildNoteEntity()
+                viewModel.saveNote(note)
                 Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
+                setAlarm(note.title, note.description, Random(10).nextInt())
             } else {
                 viewModel.updateNote(buildNoteEntity(noteId))
                 Snackbar.make(view, "Updated", Snackbar.LENGTH_SHORT).show()
@@ -106,7 +112,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     }
 
     private fun getDateTimeCalendar() {
-        val cal = Calendar.getInstance()
+        cal = Calendar.getInstance()
         year = cal.get(Calendar.YEAR)
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
@@ -117,6 +123,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
         date += "$day-${month+1}-$year"
         getDateTimeCalendar()
+        cal[Calendar.YEAR] = year
+        cal[Calendar.MONTH] = month
+        cal[Calendar.DAY_OF_MONTH] = day
         TimePickerDialog(requireContext(), this, hour, minute, true).show()
     }
 
@@ -124,6 +133,10 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         date += " $hour:$min"
         binding.tvDate.text = ""
         binding.tvDate.text = date
+        cal[Calendar.HOUR] = hour
+        cal[Calendar.MINUTE] = min
+        cal[Calendar.SECOND] = 0
+        cal[Calendar.MILLISECOND] = 0
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -158,15 +171,14 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnspecifiedImmutableFlag")
-    private fun setAlarm(calendar: Calendar, title: String, description: String) {
+    private fun setAlarm(title: String, description: String, id: Int) {
         val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(requireContext(), NotificationReceiver::class.java)
         intent.putExtra(NOTE_TITLE_EXTRA, title)
         intent.putExtra(NOTE_DESC_EXTRA, description)
+        intent.putExtra(NOTE_CHANNEL_ID_INC, id)
 
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis , pendingIntent)
-
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, 0)
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
     }
 }
