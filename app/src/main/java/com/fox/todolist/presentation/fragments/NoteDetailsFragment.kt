@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_MUTABLE
 import android.app.TimePickerDialog
 import android.content.ClipDescription
 import android.content.Context.ALARM_SERVICE
@@ -178,7 +179,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         intent.putExtra(NOTE_DESC_EXTRA, description)
         intent.putExtra(NOTE_CHANNEL_ID_INC, id)
 
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, 0)
+        val tick = Date().time
+
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), tick.toInt(), intent, FLAG_MUTABLE)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
     }
 }
