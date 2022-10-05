@@ -12,13 +12,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textColor="@color/milk"
         android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
         android:padding="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tb_main_fragment"
+        app:layout_constraintTop_toTopOf="@id/tb_main_fragment" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -29,7 +38,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tb_main_fragment"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
         app:spanCount="2"
         tools:ignore="SpeakableTextPresentCheck"
         tools:listitem="@layout/task_item" />
