@@ -25,7 +25,8 @@ class NoteAdapter(
         @SuppressLint("SimpleDateFormat")
         fun bind(note: NoteEntity) {
             binding.tvTitle.text = note.title
-            binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date!!)
+            if(note.date != null)
+                binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date)
         }
     }
 

@@ -83,7 +83,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             binding.btnDelete.visibility = View.VISIBLE
             binding.btnDelete.setOnClickListener {
                 viewModel.deleteNote(noteEntity)
-                Snackbar.make(view, "Deleted", Snackbar.LENGTH_SHORT).show()
+                showMessage("Deleted")
                 findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
             }
         }
@@ -95,13 +95,20 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
         binding.btnAdd.setOnClickListener {
             if(noteId == 0) {
+                if(binding.etTitle.text.isNullOrBlank()) {
+                    showMessage("Fill title field!")
+                    return@setOnClickListener
+                }
                 val note = buildNoteEntity()
                 viewModel.saveNote(note)
-                Snackbar.make(view, "Saved", Snackbar.LENGTH_SHORT).show()
-                setAlarm(note.title, note.description, Random(10).nextInt())
+
+                if(note.date != null)
+                    setAlarm(note.title, note.description, Random(10).nextInt())
+                showMessage("Created")
+
             } else {
                 viewModel.updateNote(buildNoteEntity(noteId))
-                Snackbar.make(view, "Updated", Snackbar.LENGTH_SHORT).show()
+                showMessage("Updated")
             }
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
         }
@@ -167,7 +174,8 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     private fun fillFields(note: NoteEntity) {
         binding.etTitle.setText(note.title)
         binding.etDescription.setText(note.description)
-        binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date!!)
+        if(note.date != null)
+            binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -184,4 +192,6 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         val pendingIntent = PendingIntent.getBroadcast(requireContext(), tick.toInt(), intent, FLAG_MUTABLE)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
     }
+
+    private fun showMessage(message: String) = Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
 }
