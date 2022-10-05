@@ -28,8 +28,7 @@
                 android:layout_gravity="center_horizontal"
                 android:textSize="28sp"
                 android:padding="5dp"
-                android:textColor="@color/milk"
-                android:text="First note" />
+                android:textColor="@color/milk" />
 
             <TextView
                 android:id="@+id/tv_date"
@@ -38,8 +37,7 @@
                 android:layout_gravity="end"
                 android:textSize="14sp"
                 android:padding="5dp"
-                android:textColor="@color/milk"
-                android:text="19.08.2022 8:19"/>
+                android:textColor="@color/milk" />
 
         </LinearLayout>
 
