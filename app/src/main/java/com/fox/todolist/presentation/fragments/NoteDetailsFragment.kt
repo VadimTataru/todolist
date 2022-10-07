@@ -124,7 +124,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         year = cal.get(Calendar.YEAR)
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
-        hour = cal.get(Calendar.HOUR)
+        hour = cal.get(Calendar.HOUR_OF_DAY)
         minute = cal.get(Calendar.MINUTE)
     }
 
@@ -191,6 +191,14 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
         val pendingIntent = PendingIntent.getBroadcast(requireContext(), tick.toInt(), intent, FLAG_MUTABLE)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
+    }
+
+    private fun cancelAlarm(broadcastId: Int) {
+        val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(requireContext(), NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), broadcastId, intent, FLAG_MUTABLE)
+
+        alarmManager.cancel(pendingIntent)
     }
 
     private fun showMessage(message: String) = Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
