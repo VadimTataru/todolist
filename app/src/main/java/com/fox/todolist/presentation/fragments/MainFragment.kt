@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.fox.todolist.R
@@ -42,10 +41,10 @@ class MainFragment : Fragment() {
         initRecycler(view)
         initViews()
 
-        viewModel.getNotes().observe(viewLifecycleOwner, Observer{ notes ->
+        viewModel.getNotes().observe(viewLifecycleOwner) { notes ->
             noteList = notes as MutableList<NoteEntity>
             noteAdapter.fillNoteList(notes)
-        })
+        }
 
         initSearchView()
     }
