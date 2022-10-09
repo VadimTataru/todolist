@@ -6,12 +6,10 @@ import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.app.TimePickerDialog
-import android.content.ClipDescription
 import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,11 +17,8 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.annotation.RequiresApi
-import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.fox.todolist.R
@@ -36,15 +31,12 @@ import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @AndroidEntryPoint
 class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
-    lateinit var binding: FragmentNoteDetailsBinding
+    private lateinit var binding: FragmentNoteDetailsBinding
     private val viewModel by viewModels<NoteDetailsViewModel>()
     private lateinit var noteEntity: NoteEntity
     private lateinit var cal: Calendar
@@ -141,7 +133,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         date += " $hour:$min"
         binding.tvDate.text = ""
         binding.tvDate.text = date
-        cal[Calendar.HOUR] = hour
+        cal[Calendar.HOUR_OF_DAY] = hour
         cal[Calendar.MINUTE] = min
         cal[Calendar.SECOND] = 0
         cal[Calendar.MILLISECOND] = 0
