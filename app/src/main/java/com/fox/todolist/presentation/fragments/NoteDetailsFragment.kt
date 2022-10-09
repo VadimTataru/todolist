@@ -65,7 +65,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         if(noteId != 0) {
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.getById(noteId).collect{
-                    noteEntity = it ?: NoteEntity(0, "", "", Date(0), 0)
+                    noteEntity = it ?: NoteEntity(0, "", "", Date(0), 0, 0)
                     fillFields(noteEntity)
                 }
             }
@@ -75,6 +75,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             binding.btnDelete.visibility = View.VISIBLE
             binding.btnDelete.setOnClickListener {
                 viewModel.deleteNote(noteEntity)
+                if(noteEntity.pendingId != 0) cancelAlarm(noteEntity.pendingId)
                 showMessage("Deleted")
                 findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
             }
@@ -86,20 +87,36 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         }
 
         binding.btnAdd.setOnClickListener {
+            val broadcastId = Date().time.toInt()
             if(noteId == 0) {
                 if(binding.etTitle.text.isNullOrBlank()) {
                     showMessage("Fill title field!")
                     return@setOnClickListener
                 }
-                val note = buildNoteEntity()
+
+                val note = buildNoteEntity(broadcastId = broadcastId)
+                if(note.date == null)
+                    note.pendingId = 0;
+
                 viewModel.saveNote(note)
 
                 if(note.date != null)
-                    setAlarm(note.title, note.description, Random(10).nextInt())
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
                 showMessage("Created")
 
             } else {
-                viewModel.updateNote(buildNoteEntity(noteId))
+                val note = buildNoteEntity(noteId, broadcastId)
+                if(noteEntity.pendingId == 0 && note.date != null) {
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
+                } else if(noteEntity.pendingId != 0 && noteEntity.date != note.date && note.date != null) {
+                    cancelAlarm(noteEntity.pendingId)
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
+                }
+
+                if(note.date == null)
+                    note.pendingId = 0;
+
+                viewModel.updateNote(note)
                 showMessage("Updated")
             }
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
@@ -140,7 +157,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun buildNoteEntity(id: Int = 0): NoteEntity {
+    private fun buildNoteEntity(id: Int = 0, broadcastId: Int): NoteEntity {
         val dateAsString = binding.tvDate.text.toString()
         return NoteEntity(
             id,
@@ -150,7 +167,8 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
                 null
             else
                 SimpleDateFormat("dd-MM-yyyy HH:mm").parse(binding.tvDate.text.toString()),
-            0
+            0,
+            broadcastId
         )
     }
 
@@ -172,16 +190,15 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnspecifiedImmutableFlag")
-    private fun setAlarm(title: String, description: String, id: Int) {
+    private fun setAlarm(title: String, description: String, id: Int, broadcastId: Int) {
         val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(requireContext(), NotificationReceiver::class.java)
         intent.putExtra(NOTE_TITLE_EXTRA, title)
         intent.putExtra(NOTE_DESC_EXTRA, description)
         intent.putExtra(NOTE_CHANNEL_ID_INC, id)
 
-        val tick = Date().time
 
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(), tick.toInt(), intent, FLAG_MUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), broadcastId, intent, FLAG_MUTABLE)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
     }
 
