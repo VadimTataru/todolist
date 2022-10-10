@@ -6,12 +6,10 @@ import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.app.TimePickerDialog
-import android.content.ClipDescription
 import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,11 +17,8 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.annotation.RequiresApi
-import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.fox.todolist.R
@@ -36,15 +31,12 @@ import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @AndroidEntryPoint
 class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
-    lateinit var binding: FragmentNoteDetailsBinding
+    private lateinit var binding: FragmentNoteDetailsBinding
     private val viewModel by viewModels<NoteDetailsViewModel>()
     private lateinit var noteEntity: NoteEntity
     private lateinit var cal: Calendar
@@ -73,7 +65,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         if(noteId != 0) {
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
                 viewModel.getById(noteId).collect{
-                    noteEntity = it ?: NoteEntity(0, "", "", Date(0), 0)
+                    noteEntity = it ?: NoteEntity(0, "", "", Date(0), 0, 0)
                     fillFields(noteEntity)
                 }
             }
@@ -83,6 +75,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             binding.btnDelete.visibility = View.VISIBLE
             binding.btnDelete.setOnClickListener {
                 viewModel.deleteNote(noteEntity)
+                if(noteEntity.pendingId != 0) cancelAlarm(noteEntity.pendingId)
                 showMessage("Deleted")
                 findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
             }
@@ -94,20 +87,36 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         }
 
         binding.btnAdd.setOnClickListener {
+            val broadcastId = Date().time.toInt()
             if(noteId == 0) {
                 if(binding.etTitle.text.isNullOrBlank()) {
                     showMessage("Fill title field!")
                     return@setOnClickListener
                 }
-                val note = buildNoteEntity()
+
+                val note = buildNoteEntity(broadcastId = broadcastId)
+                if(note.date == null)
+                    note.pendingId = 0;
+
                 viewModel.saveNote(note)
 
                 if(note.date != null)
-                    setAlarm(note.title, note.description, Random(10).nextInt())
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
                 showMessage("Created")
 
             } else {
-                viewModel.updateNote(buildNoteEntity(noteId))
+                val note = buildNoteEntity(noteId, broadcastId)
+                if(noteEntity.pendingId == 0 && note.date != null) {
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
+                } else if(noteEntity.pendingId != 0 && noteEntity.date != note.date && note.date != null) {
+                    cancelAlarm(noteEntity.pendingId)
+                    setAlarm(note.title, note.description, Random(10).nextInt(), broadcastId)
+                }
+
+                if(note.date == null)
+                    note.pendingId = 0;
+
+                viewModel.updateNote(note)
                 showMessage("Updated")
             }
             findNavController().navigate(R.id.action_noteDetailsFragment_to_mainFragment)
@@ -124,7 +133,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         year = cal.get(Calendar.YEAR)
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
-        hour = cal.get(Calendar.HOUR)
+        hour = cal.get(Calendar.HOUR_OF_DAY)
         minute = cal.get(Calendar.MINUTE)
     }
 
@@ -141,14 +150,14 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         date += " $hour:$min"
         binding.tvDate.text = ""
         binding.tvDate.text = date
-        cal[Calendar.HOUR] = hour
+        cal[Calendar.HOUR_OF_DAY] = hour
         cal[Calendar.MINUTE] = min
         cal[Calendar.SECOND] = 0
         cal[Calendar.MILLISECOND] = 0
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun buildNoteEntity(id: Int = 0): NoteEntity {
+    private fun buildNoteEntity(id: Int = 0, broadcastId: Int): NoteEntity {
         val dateAsString = binding.tvDate.text.toString()
         return NoteEntity(
             id,
@@ -158,7 +167,8 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
                 null
             else
                 SimpleDateFormat("dd-MM-yyyy HH:mm").parse(binding.tvDate.text.toString()),
-            0
+            0,
+            broadcastId
         )
     }
 
@@ -180,17 +190,24 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("UnspecifiedImmutableFlag")
-    private fun setAlarm(title: String, description: String, id: Int) {
+    private fun setAlarm(title: String, description: String, id: Int, broadcastId: Int) {
         val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(requireContext(), NotificationReceiver::class.java)
         intent.putExtra(NOTE_TITLE_EXTRA, title)
         intent.putExtra(NOTE_DESC_EXTRA, description)
         intent.putExtra(NOTE_CHANNEL_ID_INC, id)
 
-        val tick = Date().time
 
-        val pendingIntent = PendingIntent.getBroadcast(requireContext(), tick.toInt(), intent, FLAG_MUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), broadcastId, intent, FLAG_MUTABLE)
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis , pendingIntent)
+    }
+
+    private fun cancelAlarm(broadcastId: Int) {
+        val alarmManager = requireContext().getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(requireContext(), NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(requireContext(), broadcastId, intent, FLAG_MUTABLE)
+
+        alarmManager.cancel(pendingIntent)
     }
 
     private fun showMessage(message: String) = Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()

@@ -5,9 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.fox.todolist.R
@@ -16,8 +15,9 @@ import com.fox.todolist.databinding.FragmentMainBinding
 import com.fox.todolist.presentation.adapter.NoteAdapter
 import com.fox.todolist.presentation.listeners.NoteActionListener
 import com.fox.todolist.presentation.viewmodel.MainFragmentViewModel
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class MainFragment : Fragment() {
@@ -25,6 +25,8 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     private lateinit var noteAdapter: NoteAdapter
     private val viewModel by viewModels<MainFragmentViewModel>()
+    private lateinit var noteList: List<NoteEntity>
+    private lateinit var tempNoteList: ArrayList<NoteEntity>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,9 +41,12 @@ class MainFragment : Fragment() {
         initRecycler(view)
         initViews()
 
-        viewModel.getNotes().observe(viewLifecycleOwner, Observer{ notes ->
+        viewModel.getNotes().observe(viewLifecycleOwner) { notes ->
+            noteList = notes as MutableList<NoteEntity>
             noteAdapter.fillNoteList(notes)
-        })
+        }
+
+        initSearchView()
     }
 
     private fun initViews() {
@@ -69,5 +74,32 @@ class MainFragment : Fragment() {
             })
             adapter = noteAdapter
         }
+    }
+
+    private fun initSearchView() {
+        val searchView: SearchView = binding.searchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override fun onQueryTextChange(text: String?): Boolean {
+                tempNoteList = arrayListOf()
+                val newText = text!!.lowercase(Locale.getDefault())
+                if(newText.isNotEmpty()) {
+                    noteList.forEach{
+                        if(it.title.lowercase(Locale.getDefault()).contains(newText)) {
+                            tempNoteList.add(it)
+                        }
+                    }
+
+                    noteAdapter.fillNoteList(tempNoteList as List<NoteEntity>)
+                } else {
+                    tempNoteList.clear()
+                    noteAdapter.fillNoteList(noteList)
+                }
+                return false
+            }
+        })
     }
 }

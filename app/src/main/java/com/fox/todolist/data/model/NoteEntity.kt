@@ -16,5 +16,6 @@ data class NoteEntity(
     @ColumnInfo(name = "description") val description: String,
     //@TypeConverters(Converters::class)
     @ColumnInfo(name = "date") val date: Date?,
-    @ColumnInfo(name = "importantly") val importantly: Int
+    @ColumnInfo(name = "importantly") val importantly: Int,
+    @ColumnInfo(name = "pendingIntentId") var pendingId: Int
 )
