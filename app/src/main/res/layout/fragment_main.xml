@@ -33,12 +33,14 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.SearchView
+                style="@style/SearchView"
                 android:id="@+id/search_view"
                 android:layoutDirection="rtl"
                 android:layout_gravity="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/pink"
+                app:searchHintIcon="@drawable/ic_baseline_search_24"
+                app:closeIcon="@drawable/ic_baseline_close_24"
                 android:layout_marginStart="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tb_main_fragment"
