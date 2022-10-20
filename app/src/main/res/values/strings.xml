@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">TO DO</string>
 
-    <string name="title_details">Note Details</string>
+    <string name="title_details">Детали заметки</string>
 
-    <string name="hint_title">Title...</string>
-    <string name="hint_description">Description...</string>
+    <string name="hint_title">Заголовок</string>
+    <string name="hint_description">Описание</string>
     <string name="wrapper_name">TO DO</string>
     <string name="wrapper_extra">Remind Everything!</string>
 </resources>
