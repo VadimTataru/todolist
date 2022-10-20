@@ -134,7 +134,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
         hour = cal.get(Calendar.HOUR_OF_DAY)
-        minute = cal.get(Calendar.MINUTE)
+        minute = cal.get(Calendar.MINUTE) + 2
     }
 
     override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
@@ -148,12 +148,21 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     override fun onTimeSet(picker: TimePicker?, hour: Int, min: Int) {
         date += " $hour:$min"
-        binding.tvDate.text = ""
-        binding.tvDate.text = date
         cal[Calendar.HOUR_OF_DAY] = hour
         cal[Calendar.MINUTE] = min
         cal[Calendar.SECOND] = 0
         cal[Calendar.MILLISECOND] = 0
+        fillDateField(cal)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun fillDateField(cal: Calendar) {
+        binding.tvDate.text = ""
+        val date = "${"%02d".format(cal[Calendar.DAY_OF_MONTH])}.${"%02d".format(cal[Calendar.MONTH])}.${cal[Calendar.YEAR]}"
+        val time = "${"%02d".format(cal[Calendar.HOUR_OF_DAY])}:${"%02d".format(cal[Calendar.MINUTE])}"
+        binding.tvDate.text = "$date $time"
+
+
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -166,7 +175,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             if(dateAsString.isBlank())
                 null
             else
-                SimpleDateFormat("dd-MM-yyyy HH:mm").parse(binding.tvDate.text.toString()),
+                SimpleDateFormat("dd-MM-yyyy HH:mm").parse(date),
             0,
             broadcastId
         )
@@ -185,7 +194,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         binding.etTitle.setText(note.title)
         binding.etDescription.setText(note.description)
         if(note.date != null)
-            binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date)
+            binding.tvDate.text = SimpleDateFormat("dd.MM.yyyy HH:mm").format(note.date)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
