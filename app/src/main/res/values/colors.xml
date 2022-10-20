@@ -14,6 +14,7 @@
     <color name="light_milk">#B2FFFFE3</color>
     <color name="pale_red_purple">#AB7783</color>
     <color name="intense_orange">#FFBD5F</color>
+    <color name="intense_orange_light">#F1C78A</color>
     <color name="dark_salmon">#E79472</color>
 
     <!--Second palette-->
@@ -28,5 +29,6 @@
     <color name="gray_graphite">#4F4F4F</color>
     <color name="red_ter">#CC4E5C</color>
     <color name="green_pastel">#50C878</color>
+    <color name="green_light">#98fb98</color>
     <color name="yellow_light">#B5A642</color>
 </resources>

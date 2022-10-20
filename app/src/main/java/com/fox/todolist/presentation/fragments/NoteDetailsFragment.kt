@@ -10,6 +10,7 @@ import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat.is24HourFormat
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -29,9 +30,13 @@ import com.fox.todolist.receiver.NotificationReceiver
 import com.fox.todolist.utils.Constants.NOTE_CHANNEL_ID_INC
 import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
+import java.time.Year
 import java.util.*
 
 @AndroidEntryPoint
@@ -60,6 +65,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val noteId = getArgs()
 
         if(noteId != 0) {
@@ -125,7 +131,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     private fun pickDate() {
         getDateTimeCalendar()
-        DatePickerDialog(requireContext(), this, year, month, day).show()
+        val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
+        datePickerDialog.datePicker.minDate = cal.timeInMillis
+        datePickerDialog.show()
     }
 
     private fun getDateTimeCalendar() {
@@ -133,17 +141,18 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         year = cal.get(Calendar.YEAR)
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
-        hour = cal.get(Calendar.HOUR_OF_DAY)
+        val isSystem24Hour = is24HourFormat(requireContext())
+        hour = cal.get(if(isSystem24Hour) Calendar.HOUR_OF_DAY else Calendar.HOUR)
         minute = cal.get(Calendar.MINUTE) + 2
     }
 
     override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
         date += "$day-${month+1}-$year"
-        getDateTimeCalendar()
         cal[Calendar.YEAR] = year
         cal[Calendar.MONTH] = month
         cal[Calendar.DAY_OF_MONTH] = day
-        TimePickerDialog(requireContext(), this, hour, minute, true).show()
+        val isSystem24Hour = is24HourFormat(requireContext())
+        TimePickerDialog(requireContext(), this, hour, minute, isSystem24Hour).show()
     }
 
     override fun onTimeSet(picker: TimePicker?, hour: Int, min: Int) {
@@ -161,8 +170,6 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         val date = "${"%02d".format(cal[Calendar.DAY_OF_MONTH])}.${"%02d".format(cal[Calendar.MONTH])}.${cal[Calendar.YEAR]}"
         val time = "${"%02d".format(cal[Calendar.HOUR_OF_DAY])}:${"%02d".format(cal[Calendar.MINUTE])}"
         binding.tvDate.text = "$date $time"
-
-
     }
 
     @SuppressLint("SimpleDateFormat")

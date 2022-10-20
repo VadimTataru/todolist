@@ -3,6 +3,9 @@
 
     <string name="title_details">Детали заметки</string>
 
+    <string name="date_picker_title">Выберите дату</string>
+    <string name="time_picker_title">Выберите время</string>
+
     <string name="hint_title">Заголовок</string>
     <string name="hint_description">Описание</string>
     <string name="wrapper_name">TO DO</string>
