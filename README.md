@@ -13,5 +13,9 @@ Note assistant app.
 #### Notification
 ![image](https://user-images.githubusercontent.com/64976256/197333338-fb0f8e52-d646-4786-bc93-0f86c10d2235.png)
 
-
-
+### Используемый стек
+- Room
+- Dagger Hilt
+- Coroutines
+- Navigation component
+- MVVM
