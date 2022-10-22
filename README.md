@@ -10,7 +10,7 @@ Note assistant app.
 ![image](https://user-images.githubusercontent.com/64976256/197333243-e407d674-4ef7-4126-b0aa-acb490573724.png)
 #### Details screen
 ![image](https://user-images.githubusercontent.com/64976256/197333257-2ff4fc8e-c47d-4c43-a7b3-a5ac52a4779f.png)
-### Notification
+#### Notification
 ![image](https://user-images.githubusercontent.com/64976256/197333338-fb0f8e52-d646-4786-bc93-0f86c10d2235.png)
 
 
