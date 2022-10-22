@@ -10,6 +10,7 @@ import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat.is24HourFormat
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -29,9 +30,13 @@ import com.fox.todolist.receiver.NotificationReceiver
 import com.fox.todolist.utils.Constants.NOTE_CHANNEL_ID_INC
 import com.fox.todolist.utils.Constants.NOTE_DESC_EXTRA
 import com.fox.todolist.utils.Constants.NOTE_TITLE_EXTRA
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
+import java.time.Year
 import java.util.*
 
 @AndroidEntryPoint
@@ -60,6 +65,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val noteId = getArgs()
 
         if(noteId != 0) {
@@ -125,7 +131,9 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
 
     private fun pickDate() {
         getDateTimeCalendar()
-        DatePickerDialog(requireContext(), this, year, month, day).show()
+        val datePickerDialog = DatePickerDialog(requireContext(), this, year, month, day)
+        datePickerDialog.datePicker.minDate = cal.timeInMillis
+        datePickerDialog.show()
     }
 
     private fun getDateTimeCalendar() {
@@ -133,27 +141,35 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         year = cal.get(Calendar.YEAR)
         month = cal.get(Calendar.MONTH)
         day = cal.get(Calendar.DAY_OF_MONTH)
-        hour = cal.get(Calendar.HOUR_OF_DAY)
-        minute = cal.get(Calendar.MINUTE)
+        val isSystem24Hour = is24HourFormat(requireContext())
+        hour = cal.get(if(isSystem24Hour) Calendar.HOUR_OF_DAY else Calendar.HOUR)
+        minute = cal.get(Calendar.MINUTE) + 2
     }
 
     override fun onDateSet(picker: DatePicker?, year: Int, month: Int, day: Int) {
         date += "$day-${month+1}-$year"
-        getDateTimeCalendar()
         cal[Calendar.YEAR] = year
         cal[Calendar.MONTH] = month
         cal[Calendar.DAY_OF_MONTH] = day
-        TimePickerDialog(requireContext(), this, hour, minute, true).show()
+        val isSystem24Hour = is24HourFormat(requireContext())
+        TimePickerDialog(requireContext(), this, hour, minute, isSystem24Hour).show()
     }
 
     override fun onTimeSet(picker: TimePicker?, hour: Int, min: Int) {
         date += " $hour:$min"
-        binding.tvDate.text = ""
-        binding.tvDate.text = date
         cal[Calendar.HOUR_OF_DAY] = hour
         cal[Calendar.MINUTE] = min
         cal[Calendar.SECOND] = 0
         cal[Calendar.MILLISECOND] = 0
+        fillDateField(cal)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun fillDateField(cal: Calendar) {
+        binding.tvDate.text = ""
+        val date = "${"%02d".format(cal[Calendar.DAY_OF_MONTH])}.${"%02d".format(cal[Calendar.MONTH])}.${cal[Calendar.YEAR]}"
+        val time = "${"%02d".format(cal[Calendar.HOUR_OF_DAY])}:${"%02d".format(cal[Calendar.MINUTE])}"
+        binding.tvDate.text = "$date $time"
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -166,7 +182,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
             if(dateAsString.isBlank())
                 null
             else
-                SimpleDateFormat("dd-MM-yyyy HH:mm").parse(binding.tvDate.text.toString()),
+                SimpleDateFormat("dd-MM-yyyy HH:mm").parse(date),
             0,
             broadcastId
         )
@@ -185,7 +201,7 @@ class NoteDetailsFragment : Fragment(), DatePickerDialog.OnDateSetListener, Time
         binding.etTitle.setText(note.title)
         binding.etDescription.setText(note.description)
         if(note.date != null)
-            binding.tvDate.text = SimpleDateFormat("dd-MM-yyyy HH:mm").format(note.date)
+            binding.tvDate.text = SimpleDateFormat("dd.MM.yyyy HH:mm").format(note.date)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

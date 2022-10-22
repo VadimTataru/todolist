@@ -80,7 +80,7 @@ class MainFragment : Fragment() {
         val searchView: SearchView = binding.searchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
-                TODO("Not yet implemented")
+                return true
             }
 
             override fun onQueryTextChange(text: String?): Boolean {
